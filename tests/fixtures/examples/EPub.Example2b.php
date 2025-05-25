@@ -1,11 +1,10 @@
 <?php
-include '../vendor/autoload.php';
+include __DIR__ . '/../../../vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\EPubChapterSplitter;
 use PHPePub\Core\Logger;
 use PHPePub\Core\Structure\OPF\DublinCore;
-use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Helpers\CalibreHelper;
 use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
@@ -38,8 +37,7 @@ $log = new Logger("Example", TRUE);
 
 $fileDir = './PHPePub';
 
-// Default is EPub::BOOK_VERSION_EPUB2
-$book = new EPub();
+$book = new EPub(); // Default is EPub::BOOK_VERSION_EPUB2
 $log->logLine("new EPub()");
 $log->logLine("EPub class version.: " . EPub::VERSION);
 $log->logLine("Zip version........: " . Zip::VERSION);
@@ -64,7 +62,7 @@ $book->setSubject("keywords");
 $book->setSubject("Chapter levels");
 
 // Insert custom meta data to the book, in this case, Calibre series index information.
-CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "1");
+CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "2");
 
 $log->logLine("Set up parameters");
 
@@ -75,7 +73,7 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 
 // This test requires you have an image, change "demo/cover-image.jpg" to match your location.
 $log->logLine("Add Cover Image");
-$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
+$book->setCoverImage("Cover.jpg", file_get_contents(__DIR__ . "/demo/cover-image.jpg"), "image/jpeg");
 
 // A better way is to let EPub handle the image itself, as it may need resizing. Most e-books are only about 600x800
 //  pixels, adding mega-pixel images is a waste of place and spends bandwidth. setCoverImage can resize the image.
@@ -88,29 +86,32 @@ $log->logLine("Set Cover Image");
 
 $cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n" . $bookEnd;
 $book->addChapter("Notices", "Cover.html", $cover);
-$book->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
-//    function buildTOC($cssFileName = NULL, $tocCSSClass = "toc", $title = "Table of Contents", $addReferences = TRUE, $addToIndex = FALSE, $tocFileName = "TOC.xhtml") {
 
-$book->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
-
-// add a custom metadata to use on the MetaValue entries.
-// Using DublinCore as an example, even if it is automatically included.
-$book->addCustomNamespace("dc", "http://purl.org/dc/elements/1.1/"); // StaticData::$namespaces["dc"]);
-// This is to show how to use meta data, normally you'd use the $book->setAuthor
-$metaValue = new MetaValue("dc:creator", "Jane Doe Johnson");
-$metaValue->addOpfAttr("file-as", "Johnson, Jane Doe");
-$metaValue->addOpfAttr("role", "aut");
-
-$book->addCustomMetaValue($metaValue);
-
+$book->buildTOC();
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<h2>Lorem ipsum</h2>\n"
     . "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec magna lorem, mattis sit amet porta vitae, consectetur ut eros. Nullam id mattis lacus. In eget neque magna, congue imperdiet nulla. Aenean erat lacus, imperdiet a adipiscing non, dignissim eget felis. Nulla facilisi. Vivamus sit amet lorem eget mauris dictum pharetra. In mauris nulla, placerat a accumsan ac, mollis sit amet ligula. Donec eget facilisis dui. Cras elit quam, imperdiet at malesuada vitae, luctus id orci. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque eu libero in leo ultrices tristique. Etiam quis ornare massa. Donec in velit leo. Sed eu ante tortor.</p>\n"
     . "<p><img src=\"https://i.imgur.com/kqsTBE5.png\" alt=\"Test Image retrieved off the internet: Another happily married couple\" />Nullam at tempus enim. Nunc et augue non lectus consequat rhoncus ac a odio. Morbi et tellus eget nisi volutpat tincidunt. Curabitur tristique neque tincidunt purus blandit bibendum. Maecenas eleifend sem quis magna semper id pulvinar nisi porttitor. In in lectus accumsan eros tristique pharetra sit amet ac nulla. Nam vitae felis et orci congue porta nec non ipsum. Donec pretium blandit accumsan. In aliquam lacinia nisi, ut venenatis mauris condimentum ut. Morbi rutrum orci et nisl accumsan euismod. Etiam viverra luctus sem pellentesque suscipit. Aliquam ultricies egestas risus at eleifend. Ut lacinia, tortor non varius malesuada, massa diam aliquet augue, vitae tempor metus tellus eget diam. Nulla vel augue eu elit adipiscing egestas. Duis et nulla est, ac congue arcu. Phasellus semper, ipsum et blandit rutrum, erat ante semper quam, at iaculis quam tellus sed neque.</p>\n"
     . "<p>Pellentesque vulputate sollicitudin justo, at faucibus nisl convallis in. Nulla facilisi. Curabitur nec mauris eu justo ultricies ultricies gravida eu ipsum. Pellentesque at nunc velit, vitae congue nisl. Nam varius imperdiet leo eu accumsan. Nullam elementum fermentum diam euismod porttitor. Etiam sed pellentesque ante. Donec in est elementum mi tempor consectetur. Fusce orci lorem, mollis at tincidunt eget, fringilla sed nunc. Ut consectetur condimentum condimentum. Phasellus sed felis non massa gravida euismod ut in tellus. Curabitur suscipit pharetra sapien vitae dignissim. Morbi id arcu nec ante viverra lobortis vitae nec quam. Mauris id gravida odio. Nunc non sem nisi. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque hendrerit volutpat nisl id elementum. Vivamus lobortis iaculis nisi, sit amet tristique risus porttitor vel. Suspendisse potenti.</p>\n"
     . "<p>Quisque aliquet sapien leo, vitae eleifend dolor. Fusce quis tincidunt nunc. Nam nec purus nulla, ac eleifend lorem. Curabitur eu quam et nibh egestas mattis. Maecenas eget felis augue. Integer scelerisque commodo urna, a pulvinar tortor euismod et. Praesent in nunc sapien. Ut iaculis auctor neque, sit amet rutrum est faucibus vitae. Sed a sagittis quam. Quisque interdum luctus fringilla. Vestibulum vitae nunc in felis luctus ultricies at id magna. Nam volutpat sapien ac lorem interdum pellentesque. Suspendisse faucibus, leo vitae laoreet interdum, mi mi pulvinar neque, sit amet tristique sapien nulla nec dolor. Etiam non ligula augue.</p>\n"
-    . "<p>Vivamus purus elit, ornare eget accumsan ut, luctus et orci. Sed vestibulum turpis ut quam vehicula id hendrerit velit suscipit. Pellentesque pulvinar, libero vitae sagittis scelerisque, felis ante faucibus risus, ut viverra velit mi at tortor. Aliquam lacinia condimentum felis, eu elementum ligula laoreet vitae. Sed placerat tempus turpis a fringilla. Etiam porta accumsan feugiat. Phasellus et cursus magna. Suspendisse vitae odio sit amet urna vulputate consectetur. Vestibulum massa magna, sagittis at dictum vitae, sagittis scelerisque erat. Donec viverra tincidunt lacus. Maecenas fermentum erat et mauris tincidunt sed eleifend quam tempus. In at augue mi, in tincidunt arcu. Duis dapibus aliquet mi, ac ullamcorper est semper quis. Sed nec nulla nec odio malesuada viverra id sed nulla. Donec lobortis euismod aliquam. Praesent sit amet dolor quis lacus auctor lobortis. In hac habitasse platea dictumst. Sed at nisi sed nisi ullamcorper pellentesque. Vivamus eget enim sem, non laoreet leo. Sed vel odio lacus.</p>\n"
-    . $bookEnd;
+    . "<p>Vivamus purus elit, ornare eget accumsan ut, luctus et orci. Sed vestibulum turpis ut quam vehicula id hendrerit velit suscipit. Pellentesque pulvinar, libero vitae sagittis scelerisque, felis ante faucibus risus, ut viverra velit mi at tortor. Aliquam lacinia condimentum felis, eu elementum ligula laoreet vitae. Sed placerat tempus turpis a fringilla. Etiam porta accumsan feugiat. Phasellus et cursus magna. Suspendisse vitae odio sit amet urna vulputate consectetur. Vestibulum massa magna, sagittis at dictum vitae, sagittis scelerisque erat. Donec viverra tincidunt lacus. Maecenas fermentum erat et mauris tincidunt sed eleifend quam tempus. In at augue mi, in tincidunt arcu. Duis dapibus aliquet mi, ac ullamcorper est semper quis. Sed nec nulla nec odio malesuada viverra id sed nulla. Donec lobortis euismod aliquam. Praesent sit amet dolor quis lacus auctor lobortis. In hac habitasse platea dictumst. Sed at nisi sed nisi ullamcorper pellentesque. Vivamus eget enim sem, non laoreet leo. Sed vel odio lacus.</p>\n";
+/*
+$index = 1;
+do {
+    $index++;
+    $chapter1 .= "<h2>Section $index</h2>\n";
+    $chapter1 .= "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum consequat nulla ac libero dapibus ornare. Nam vel lacus in eros vehicula volutpat at ac est. Cras eleifend odio vitae nibh viverra et blandit nibh iaculis. Aenean non pellentesque nisi. Pellentesque ultricies mauris vel odio ullamcorper auctor. Etiam nec erat non mi blandit sollicitudin sed sed metus. Cras vel sagittis augue. Vestibulum eros neque, convallis vel semper in, fringilla sit amet justo. Proin lobortis est ut augue cursus egestas. Maecenas cursus blandit tellus vitae varius. Integer euismod malesuada volutpat. Praesent sem odio, consequat tristique dictum tincidunt, ultricies sit amet sapien. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n"
+        . "<p>Pellentesque sit amet libero arcu, eu congue magna. Nam commodo, leo sed placerat sollicitudin, eros dolor vehicula ipsum, volutpat bibendum justo quam a turpis. Curabitur viverra ornare odio, aliquet accumsan nisi lobortis ut. Sed id mi non purus ultrices vestibulum eu ac justo. Nunc ultrices vulputate nulla eget porta. Nam iaculis arcu nec libero pretium eu ultricies enim porttitor. Praesent commodo, purus vel elementum egestas, sem nisl fermentum lorem, ac porttitor quam eros eget ante. Fusce diam eros, lacinia sit amet porttitor ac, lacinia quis mauris. Sed molestie, arcu id sodales malesuada, tortor diam faucibus diam, eget placerat tortor sapien ut est. Nam ut neque at nunc accumsan lacinia sed in neque. Nunc nec commodo eros. Suspendisse ut fringilla ipsum. Suspendisse eget neque nunc. Duis tincidunt consequat massa, vel vulputate ligula pretium a.</p>\n"
+        . "<p>Etiam blandit malesuada purus, sollicitudin eleifend magna consectetur ac. Aenean erat mi, varius non lacinia non, eleifend eget urna. Curabitur sagittis vestibulum magna vel dapibus. Phasellus tempus cursus tellus sed aliquet. Vivamus interdum tincidunt varius. Cras ut mi odio. Donec molestie vehicula justo, at congue arcu convallis nec. Proin sit amet libero ante. Nunc nec ante vel libero faucibus commodo ac at lacus. Pellentesque faucibus tellus sit amet odio viverra condimentum. Morbi ut est urna, quis laoreet diam. Aliquam vulputate risus rhoncus massa lobortis porta. Nulla eleifend suscipit interdum. Praesent dictum lobortis urna in facilisis. Proin adipiscing pulvinar accumsan. Maecenas ac lacus vitae erat porta malesuada. Proin malesuada, quam nec cursus suscipit, metus ligula accumsan tortor, non ullamcorper dui dui eget odio. In et massa vel ligula condimentum mollis. Vestibulum ac consectetur risus. Etiam at odio velit, quis blandit ante.</p>\n"
+        . "<p>Sed suscipit enim tortor. Curabitur ut dui dui, at tempus purus. Proin nulla velit, varius et ultricies at, pellentesque ac lectus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam commodo odio non leo commodo posuere. Integer sed mauris lacus. Aliquam nec diam velit, non volutpat metus. Vestibulum accumsan dignissim hendrerit. Nam elementum blandit pellentesque. Aliquam erat volutpat. Mauris ultrices metus ac enim pellentesque dignissim. Maecenas pellentesque interdum ligula, at imperdiet ipsum aliquam eu. Pellentesque pellentesque libero eget lacus placerat vel malesuada quam facilisis. Ut at nulla lacus. Nam et metus non velit accumsan pretium. Vestibulum eget iaculis nunc. In imperdiet lobortis tortor non eleifend.</p>\n"
+        . "<p>Mauris vel gravida mauris. Aliquam eleifend cursus auctor. Nulla mattis nisl sit amet sem varius eu consequat felis volutpat. Mauris leo nibh, lobortis eget interdum id, rhoncus ut nulla. Donec pretium aliquet dictum. Quisque facilisis, urna id accumsan auctor, quam turpis eleifend sem, ac pulvinar dui tellus eget sapien. Proin ut lorem sit amet velit pretium eleifend eget et velit. Proin facilisis arcu at nisl iaculis in vehicula tellus tristique. Sed in quam augue, elementum scelerisque ligula. Proin nec viverra urna. Integer sed dui orci, pulvinar cursus ante. Cras leo felis, vehicula aliquet convallis quis, aliquet vel dui. Vivamus non urna vitae augue scelerisque sagittis ac vitae sem. Aliquam sagittis, felis nec vestibulum ultricies, nisi tellus varius sapien, in pellentesque orci libero sed tellus. Duis id ante ipsum, id tincidunt leo. Phasellus cursus, nisl sit amet sodales pretium, turpis enim fringilla nisi, quis adipiscing felis velit in orci. Praesent sit amet lacus libero. Maecenas ac lorem quis metus tempus commodo eu nec justo. Nunc vitae dolor at orci ullamcorper pretium. In hac habitasse platea dictumst.</p>\n"
+        . "<p>Quisque rhoncus, nulla id viverra elementum, orci lorem lobortis enim, et fermentum erat massa et velit. Duis ullamcorper tempus laoreet. Quisque a massa vel magna viverra faucibus quis et erat. Praesent eu nulla a augue dignissim mattis. Nam ullamcorper pretium lobortis. Sed in quam vel leo dictum mattis. Quisque sapien est, consectetur et posuere sit amet, scelerisque at nulla. Proin sodales ultricies porttitor. Vestibulum sed dui lectus, sit amet hendrerit elit. Nunc nunc tortor, convallis sit amet vestibulum tempor, consequat sit amet arcu. Fusce congue scelerisque ante nec condimentum. Nulla facilisi. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Praesent ligula ante, aliquet nec ornare in, commodo ut metus. Cras varius tempor justo at dictum. Cras tincidunt posuere consectetur. Pellentesque fringilla, augue ac aliquet blandit, ante nunc accumsan eros, lacinia vehicula eros magna non est. Donec neque sapien, eleifend id mollis facilisis, fermentum eget metus. Nunc a ante lorem, vitae lacinia augue. Maecenas cursus aliquam dui.</p>\n"
+        . "<p>Donec mollis nisi nec enim mattis vitae accumsan enim elementum. In rhoncus blandit odio, in facilisis nisl placerat in. Aenean vestibulum felis id dolor imperdiet tristique. Etiam ac urna eu nunc vestibulum euismod. Nulla mi magna, viverra at scelerisque non, rhoncus tempus libero. Sed facilisis, ante ullamcorper cursus placerat, orci turpis sagittis lectus, at placerat urna lorem elementum tortor. Vivamus felis mi, dictum et accumsan ut, lobortis vehicula libero. Suspendisse tellus arcu, malesuada vitae feugiat ut, vulputate sit amet sem. Pellentesque molestie, neque non rhoncus blandit, sapien dui pretium erat, eu tincidunt augue quam convallis nulla. Integer at adipiscing metus. Vestibulum felis urna, interdum eu egestas quis, iaculis a lacus. Aliquam nec urna nisl, id dignissim enim. Sed commodo vulputate turpis, ac dapibus nulla tincidunt et. Nam id nisl libero, in feugiat velit. Pellentesque lobortis adipiscing nisl sit amet rhoncus. Curabitur vulputate, ipsum a viverra ultrices, quam augue vulputate odio, pharetra placerat lorem tortor ac risus. Nunc egestas nisi vel orci venenatis iaculis. Phasellus facilisis risus et velit ultrices pulvinar. Donec convallis leo vel nisl lacinia luctus. Praesent non justo vitae eros malesuada auctor.</p>\n"
+        . "<p>Etiam dignissim, augue eu malesuada faucibus, quam risus rhoncus libero, consectetur molestie nisl lacus eu nisl. Maecenas a nisi mauris. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean nulla urna, lobortis lacinia semper at, laoreet vitae arcu. Pellentesque pretium ultrices velit, nec interdum risus aliquet a. Donec nec nunc turpis, non sagittis magna. Donec eget dolor purus, eget sodales diam. Aliquam elementum dui eget augue commodo sit amet fermentum sem venenatis. Quisque tristique ligula sit amet nulla condimentum commodo. Donec placerat quam eget justo lacinia vitae malesuada mauris sodales. Vestibulum bibendum sem sit amet ante sagittis dignissim. Nullam placerat, enim ut suscipit ultricies, lacus mi hendrerit lorem, sit amet vestibulum libero elit ut lorem. Integer laoreet commodo aliquet. Suspendisse eget velit enim. Nam tellus tortor, hendrerit eget pulvinar id, iaculis nec leo. Donec mattis semper libero vitae laoreet. Phasellus vitae velit ut neque suscipit lobortis non at justo. Curabitur viverra nisl eu odio varius vitae pellentesque erat luctus. Phasellus porta blandit pulvinar.</p>\n"
+        . "<p>Donec rhoncus nunc sed ligula posuere a viverra nunc iaculis. Sed non dignissim nulla. Phasellus a nisl nec metus bibendum vulputate eu et ligula. Quisque dignissim quam id erat elementum cursus. Sed quis nisi nec lacus ullamcorper commodo. Nulla in lacinia odio. Vivamus metus turpis, tristique sed rutrum malesuada, pretium sed felis. Aliquam erat volutpat. Vestibulum eu elit porta tellus placerat consequat. Morbi sem nunc, vulputate sed scelerisque ut, feugiat et leo. Nam pellentesque metus eget ipsum feugiat euismod. Mauris nec enim sit amet turpis rutrum gravida. Cras velit nisl, tincidunt at mattis euismod, aliquet et urna. Sed pellentesque, magna at tristique pellentesque, metus est malesuada dolor, id lobortis eros justo in quam. In in lectus et arcu volutpat lacinia at ac nisl.</p>\n";
+} while (strlen($chapter1) < 300000);
+*/
+$chapter1 .= $bookEnd;
 
 $chapter2 =
       "<h2>Vivamus bibendum massa</h2>\n"
@@ -150,8 +151,8 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
     . "<p>Donec mollis nisi nec enim mattis vitae accumsan enim elementum. In rhoncus blandit odio, in facilisis nisl placerat in. Aenean vestibulum felis id dolor imperdiet tristique. Etiam ac urna eu nunc vestibulum euismod. Nulla mi magna, viverra at scelerisque non, rhoncus tempus libero. Sed facilisis, ante ullamcorper cursus placerat, orci turpis sagittis lectus, at placerat urna lorem elementum tortor. Vivamus felis mi, dictum et accumsan ut, lobortis vehicula libero. Suspendisse tellus arcu, malesuada vitae feugiat ut, vulputate sit amet sem. Pellentesque molestie, neque non rhoncus blandit, sapien dui pretium erat, eu tincidunt augue quam convallis nulla. Integer at adipiscing metus. Vestibulum felis urna, interdum eu egestas quis, iaculis a lacus. Aliquam nec urna nisl, id dignissim enim. Sed commodo vulputate turpis, ac dapibus nulla tincidunt et. Nam id nisl libero, in feugiat velit. Pellentesque lobortis adipiscing nisl sit amet rhoncus. Curabitur vulputate, ipsum a viverra ultrices, quam augue vulputate odio, pharetra placerat lorem tortor ac risus. Nunc egestas nisi vel orci venenatis iaculis. Phasellus facilisis risus et velit ultrices pulvinar. Donec convallis leo vel nisl lacinia luctus. Praesent non justo vitae eros malesuada auctor.</p>\n"
     . "<p>Etiam dignissim, augue eu malesuada faucibus, quam risus rhoncus libero, consectetur molestie nisl lacus eu nisl. Maecenas a nisi mauris. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean nulla urna, lobortis lacinia semper at, laoreet vitae arcu. Pellentesque pretium ultrices velit, nec interdum risus aliquet a. Donec nec nunc turpis, non sagittis magna. Donec eget dolor purus, eget sodales diam. Aliquam elementum dui eget augue commodo sit amet fermentum sem venenatis. Quisque tristique ligula sit amet nulla condimentum commodo. Donec placerat quam eget justo lacinia vitae malesuada mauris sodales. Vestibulum bibendum sem sit amet ante sagittis dignissim. Nullam placerat, enim ut suscipit ultricies, lacus mi hendrerit lorem, sit amet vestibulum libero elit ut lorem. Integer laoreet commodo aliquet. Suspendisse eget velit enim. Nam tellus tortor, hendrerit eget pulvinar id, iaculis nec leo. Donec mattis semper libero vitae laoreet. Phasellus vitae velit ut neque suscipit lobortis non at justo. Curabitur viverra nisl eu odio varius vitae pellentesque erat luctus. Phasellus porta blandit pulvinar.</p>\n"
     . "<p>Donec rhoncus nunc sed ligula posuere a viverra nunc iaculis. Sed non dignissim nulla. Phasellus a nisl nec metus bibendum vulputate eu et ligula. Quisque dignissim quam id erat elementum cursus. Sed quis nisi nec lacus ullamcorper commodo. Nulla in lacinia odio. Vivamus metus turpis, tristique sed rutrum malesuada, pretium sed felis. Aliquam erat volutpat. Vestibulum eu elit porta tellus placerat consequat. Morbi sem nunc, vulputate sed scelerisque ut, feugiat et leo. Nam pellentesque metus eget ipsum feugiat euismod. Mauris nec enim sit amet turpis rutrum gravida. Cras velit nisl, tincidunt at mattis euismod, aliquet et urna. Sed pellentesque, magna at tristique pellentesque, metus est malesuada dolor, id lobortis eros justo in quam. In in lectus et arcu volutpat lacinia at ac nisl.</p>\n"
-    . "<h1>Chapter 4B<br />test inlined chapter</h1>\n"
-    . "<h2 id=\"sub01\">Vivamus bibendum massa</h2>\n"
+    . "<h1 id=\"sub01\">Chapter 4B<br />test inlined chapter</h1>\n"
+    . "<h2>Vivamus bibendum massa</h2>\n"
     . "<p>Proin condimentum nisl tristique sapien luctus id ultrices magna molestie. Nulla nibh ligula, suscipit eget pharetra at, commodo et ligula. Quisque odio mi, aliquam a pulvinar id, condimentum vel dolor. In ut nisi eget orci facilisis pretium. Integer vel convallis nisi. Integer scelerisque luctus facilisis. Sed erat ante, adipiscing vel pretium eget, auctor quis eros. Donec tincidunt tempus porttitor. Phasellus in augue at nunc facilisis lacinia. Sed iaculis tristique diam at bibendum. Fusce lorem nibh, mollis semper pulvinar at, sollicitudin id velit. Donec aliquet, elit vel tempus sagittis, tortor nisl posuere turpis, in hendrerit mi justo id metus.</p>\n"
     . "<p>Nulla facilisi. Integer non libero neque. Cras consequat risus sed quam placerat elementum. Ut placerat, massa at sagittis fermentum, libero risus tempus urna, ac commodo lorem massa sed metus. Sed at tellus nulla, id imperdiet arcu. Proin vehicula urna arcu, sit amet eleifend dui. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas fringilla risus eu nunc lacinia vel varius odio venenatis. Sed ultrices magna purus. Ut eu risus molestie mi posuere fringilla in sit amet libero. Nulla facilisi. Sed non nulla nec mi adipiscing molestie. Aenean consectetur nibh sit amet tortor ultrices in ultrices ante tempus. Phasellus non arcu purus. In libero tellus, pharetra sed lobortis eu, tristique non neque.</p>\n"
     . "<p>Vivamus at odio id nisl egestas blandit. Sed sit amet ante urna, eget euismod justo. Cras adipiscing, purus vitae volutpat mollis, lectus massa tempor ligula, ut imperdiet erat lacus sit amet risus. Fusce erat tellus, adipiscing vitae fringilla at, pharetra eget ante. Sed sollicitudin dolor velit. Morbi suscipit turpis ac dui tincidunt nec tincidunt eros sagittis. Nulla et mauris vitae sapien commodo fermentum. Vivamus eget ante orci, id bibendum ipsum. Morbi ut neque tristique lorem pharetra rhoncus. Aliquam nisi odio, sollicitudin vel ornare quis, vestibulum sit amet magna. Cras ac augue quis mauris posuere convallis. Sed et nisi felis, in hendrerit tortor.</p>\n"
@@ -164,7 +165,7 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
     . $bookEnd;
 
 $chapter5 = $content_start . "<h1>Chapter 5</h1>\n"
-    . "<h2>Vivamus bibendum massa 5A</h2>\n"
+    . "<h2>Vivamus bibendum massa</h2>\n"
     . "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum consequat nulla ac libero dapibus ornare. Nam vel lacus in eros vehicula volutpat at ac est. Cras eleifend odio vitae nibh viverra et blandit nibh iaculis. Aenean non pellentesque nisi. Pellentesque ultricies mauris vel odio ullamcorper auctor. Etiam nec erat non mi blandit sollicitudin sed sed metus. Cras vel sagittis augue. Vestibulum eros neque, convallis vel semper in, fringilla sit amet justo. Proin lobortis est ut augue cursus egestas. Maecenas cursus blandit tellus vitae varius. Integer euismod malesuada volutpat. Praesent sem odio, consequat tristique dictum tincidunt, ultricies sit amet sapien. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n"
     . "<p>Pellentesque sit amet libero arcu, eu congue magna. Nam commodo, leo sed placerat sollicitudin, eros dolor vehicula ipsum, volutpat bibendum justo quam a turpis. Curabitur viverra ornare odio, aliquet accumsan nisi lobortis ut. Sed id mi non purus ultrices vestibulum eu ac justo. Nunc ultrices vulputate nulla eget porta. Nam iaculis arcu nec libero pretium eu ultricies enim porttitor. Praesent commodo, purus vel elementum egestas, sem nisl fermentum lorem, ac porttitor quam eros eget ante. Fusce diam eros, lacinia sit amet porttitor ac, lacinia quis mauris. Sed molestie, arcu id sodales malesuada, tortor diam faucibus diam, eget placerat tortor sapien ut est. Nam ut neque at nunc accumsan lacinia sed in neque. Nunc nec commodo eros. Suspendisse ut fringilla ipsum. Suspendisse eget neque nunc. Duis tincidunt consequat massa, vel vulputate ligula pretium a.</p>\n"
     . "<p>Etiam blandit malesuada purus, sollicitudin eleifend magna consectetur ac. Aenean erat mi, varius non lacinia non, eleifend eget urna. Curabitur sagittis vestibulum magna vel dapibus. Phasellus tempus cursus tellus sed aliquet. Vivamus interdum tincidunt varius. Cras ut mi odio. Donec molestie vehicula justo, at congue arcu convallis nec. Proin sit amet libero ante. Nunc nec ante vel libero faucibus commodo ac at lacus. Pellentesque faucibus tellus sit amet odio viverra condimentum. Morbi ut est urna, quis laoreet diam. Aliquam vulputate risus rhoncus massa lobortis porta. Nulla eleifend suscipit interdum. Praesent dictum lobortis urna in facilisis. Proin adipiscing pulvinar accumsan. Maecenas ac lacus vitae erat porta malesuada. Proin malesuada, quam nec cursus suscipit, metus ligula accumsan tortor, non ullamcorper dui dui eget odio. In et massa vel ligula condimentum mollis. Vestibulum ac consectetur risus. Etiam at odio velit, quis blandit ante.</p>\n"
@@ -175,7 +176,7 @@ $chapter5 = $content_start . "<h1>Chapter 5</h1>\n"
     . "<p>Etiam dignissim, augue eu malesuada faucibus, quam risus rhoncus libero, consectetur molestie nisl lacus eu nisl. Maecenas a nisi mauris. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean nulla urna, lobortis lacinia semper at, laoreet vitae arcu. Pellentesque pretium ultrices velit, nec interdum risus aliquet a. Donec nec nunc turpis, non sagittis magna. Donec eget dolor purus, eget sodales diam. Aliquam elementum dui eget augue commodo sit amet fermentum sem venenatis. Quisque tristique ligula sit amet nulla condimentum commodo. Donec placerat quam eget justo lacinia vitae malesuada mauris sodales. Vestibulum bibendum sem sit amet ante sagittis dignissim. Nullam placerat, enim ut suscipit ultricies, lacus mi hendrerit lorem, sit amet vestibulum libero elit ut lorem. Integer laoreet commodo aliquet. Suspendisse eget velit enim. Nam tellus tortor, hendrerit eget pulvinar id, iaculis nec leo. Donec mattis semper libero vitae laoreet. Phasellus vitae velit ut neque suscipit lobortis non at justo. Curabitur viverra nisl eu odio varius vitae pellentesque erat luctus. Phasellus porta blandit pulvinar.</p>\n"
     . "<p>Donec rhoncus nunc sed ligula posuere a viverra nunc iaculis. Sed non dignissim nulla. Phasellus a nisl nec metus bibendum vulputate eu et ligula. Quisque dignissim quam id erat elementum cursus. Sed quis nisi nec lacus ullamcorper commodo. Nulla in lacinia odio. Vivamus metus turpis, tristique sed rutrum malesuada, pretium sed felis. Aliquam erat volutpat. Vestibulum eu elit porta tellus placerat consequat. Morbi sem nunc, vulputate sed scelerisque ut, feugiat et leo. Nam pellentesque metus eget ipsum feugiat euismod. Mauris nec enim sit amet turpis rutrum gravida. Cras velit nisl, tincidunt at mattis euismod, aliquet et urna. Sed pellentesque, magna at tristique pellentesque, metus est malesuada dolor, id lobortis eros justo in quam. In in lectus et arcu volutpat lacinia at ac nisl.</p>\n"
     . "<h1>Chapter 5B<br />test inlined chapter</h1>\n"
-    . "<h2>Vivamus bibendum massa 5B</h2>\n"
+    . "<h2>Vivamus bibendum massa</h2>\n"
     . "<p>Proin condimentum nisl tristique sapien luctus id ultrices magna molestie. Nulla nibh ligula, suscipit eget pharetra at, commodo et ligula. Quisque odio mi, aliquam a pulvinar id, condimentum vel dolor. In ut nisi eget orci facilisis pretium. Integer vel convallis nisi. Integer scelerisque luctus facilisis. Sed erat ante, adipiscing vel pretium eget, auctor quis eros. Donec tincidunt tempus porttitor. Phasellus in augue at nunc facilisis lacinia. Sed iaculis tristique diam at bibendum. Fusce lorem nibh, mollis semper pulvinar at, sollicitudin id velit. Donec aliquet, elit vel tempus sagittis, tortor nisl posuere turpis, in hendrerit mi justo id metus.</p>\n"
     . "<p>Nulla facilisi. Integer non libero neque. Cras consequat risus sed quam placerat elementum. Ut placerat, massa at sagittis fermentum, libero risus tempus urna, ac commodo lorem massa sed metus. Sed at tellus nulla, id imperdiet arcu. Proin vehicula urna arcu, sit amet eleifend dui. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas fringilla risus eu nunc lacinia vel varius odio venenatis. Sed ultrices magna purus. Ut eu risus molestie mi posuere fringilla in sit amet libero. Nulla facilisi. Sed non nulla nec mi adipiscing molestie. Aenean consectetur nibh sit amet tortor ultrices in ultrices ante tempus. Phasellus non arcu purus. In libero tellus, pharetra sed lobortis eu, tristique non neque.</p>\n"
     . "<p>Vivamus at odio id nisl egestas blandit. Sed sit amet ante urna, eget euismod justo. Cras adipiscing, purus vitae volutpat mollis, lectus massa tempor ligula, ut imperdiet erat lacus sit amet risus. Fusce erat tellus, adipiscing vitae fringilla at, pharetra eget ante. Sed sollicitudin dolor velit. Morbi suscipit turpis ac dui tincidunt nec tincidunt eros sagittis. Nulla et mauris vitae sapien commodo fermentum. Vivamus eget ante orci, id bibendum ipsum. Morbi ut neque tristique lorem pharetra rhoncus. Aliquam nisi odio, sollicitudin vel ornare quis, vestibulum sit amet magna. Cras ac augue quis mauris posuere convallis. Sed et nisi felis, in hendrerit tortor.</p>\n"
@@ -203,18 +204,19 @@ $book->addLargeFile("demo/DemoInlineImage.jpg", "DemoInlineImage", "demo/DemoInl
 $log->logLine("Add Chapter 3");
 $book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
 
-// Auto split a chapter:
+// Autosplit a chapter:
 $log->logLine("Add Chapter 4");
 $book->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
 $book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.html", $chapter4, true);
 $book->setSplitSize(250000);
 
 $book->subLevel();
-$book->addChapter("Chapter 4B: test inlined chapter", "Chapter004.html#sub01");
+$book->addChapter("Chapter 4B: test in-lined chapter", "Chapter004.html#sub01");
 $book->backLevel();
 
 // More advanced use of the splitter:
 // Still using Chapter 4, but as you can see, "Chapter 4" also contains a header for Chapter 5.
+
 $splitter = new EPubChapterSplitter();
 $splitter->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
 $log->logLine("new EPubChapterSplitter()");
@@ -226,21 +228,9 @@ $log->logLine("new EPubChapterSplitter()");
  *  "Chapter " is '#^<.+?>Chapter #'
  * Essentially, the search string is looking for lines starting with...
  */
-
-$log->logLine("Split chapter 5");
-// $html2 = $splitter->splitChapter($chapter5, true, "#^\<.+?\>Chapter \d*#i");
-// $html2 = $splitter->splitChapter($chapter5, true, "Chapter ");
-$searchString = '/<h1/i';
-$html2 = $splitter->splitChapter($chapter5, true, $searchString);
-
-// $html2 is an array where the keys are the entire line, including start and end tags of the hit.
-// and the value is the segment for the match.
-// The returned array can just be parsed to the addChapter like this:
-//     $book->addChapter($cName, "Chapter005.html", $html2, true);
-// and EPub will add the parts automatically.
-// However, often you'd want to try to get a measure of control over the process
-
 $log->logLine("Add Chapter 5");
+$html2 = $splitter->splitChapter($chapter5, true, "Chapter ");/* '#^<.+?>Chapter \d*#i'); */
+$log->logLine("Split chapter 5");
 
 $idx = 0;
 foreach ($html2 as $k => $v) {
@@ -248,16 +238,18 @@ foreach ($html2 as $k => $v) {
     // Because we used a string search in the splitter, the returned hits are put in the key part of the array.
     // The entire HTML tag of the line matching the chapter search.
 
-    // Strip start and end tags. This Regexp will keep the tag name as well as the data between them.
-    preg_match('#^<(\w+)\s*.*?>(.+)</\s*\1>$#i', $k, $cName);
+    // find the text inside the tags
+    preg_match('#^<(\w+)\ *.*?>(.+)</\ *\1>$#i', $k, $cName);
 
-    // This is simply to clean up the chapter name, it can't contain any HTML.
-    // Because of the back reference, the tag name is in $cName[1], and the content is in $cName[2], this is to be the chapter name in the TOC.
-    $cName = preg_replace('#<br.+?>#i', " - ", $cName[2]);  // Change any line breaks in the chapter name to " - "
-    $cName = preg_replace('#<.+?>#i', " ", $cName);         // Remove any other tags
-    $cName = preg_replace('#\s+#i', " ", $cName);           // clean the chapter name by removing any double spaces left behind to single space.
+    // because of the back reference, the tag name is in $cName[1], and the content is in $cName[2]
+    // Change any line breaks in the chapter name to " - "
+    $cName = preg_replace('#<br.+?>#i', " - ", $cName[2]);
+    // Remove any other tags
+    $cName = preg_replace('#<.+?>#i', " ", $cName);
+    // clean the chapter name by removing any double spaces left behind to single space.
+    $cName = preg_replace('#\s+#i', " ", $cName);
 
-    $book->addChapter(trim($cName), "Chapter005_" . $idx . ".html", $v, true);
+    $book->addChapter($cName, "Chapter005_" . $idx . ".html", $v, true);
 }
 
 // Notice that Chapter 1 have an image reference in paragraph 2?
@@ -336,8 +328,8 @@ $book->addChapter("Chapter 7.3.1", "Chapter00731.html", $content_start . "<h2>Ch
 // If you have nested chapters, you can call ->rootLevel() to return your hierarchy to the root of the navMap.
 $book->rootLevel();
 
-// $log->logLine("Add TOC");
-// $book->buildTOC();
+//$log->logLine("Add TOC");
+//$book->buildTOC();
 
 $book->addChapter("Log", "Log.html", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
 
@@ -359,7 +351,10 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
     fwrite($f, ob_get_contents() . "\r\n");
     fclose($f);
 }
-*/
+ * or just:
+    $bufferData = ob_get_contents();
+    ob_end_clean();
+ */
 
 // Save book as a file relative to your script (for local ePub generation)
 // Notice that the extension .epub will be added by the script.
@@ -367,7 +362,7 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 //$book->saveBook('epub-filename', '.');
 
 // Send the book to the client. ".epub" will be appended if missing.
-$zipData = $book->sendBook("ExampleBook1");
+$zipData = $book->sendBook("ExampleBook2");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
