@@ -22,7 +22,11 @@ class ExampleUsageTest extends TestCase {
             2 => ["pipe", "w"]   // stderr
         ];
 
-        $process = proc_open("php " . escapeshellarg($exampleScript),
+        $phpVersion = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $phpBinary = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $phpVersion;
+        $phpCommand = file_exists($phpBinary) ? $phpBinary : 'php';
+
+        $process = proc_open($phpCommand . ' ' . escapeshellarg($exampleScript),
             $descriptorspec,
             $pipes);
 
