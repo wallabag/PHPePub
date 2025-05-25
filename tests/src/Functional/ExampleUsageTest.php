@@ -5,6 +5,8 @@ namespace PHPePub\Tests\Functional;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Test that all example scripts run without errors.
+ *
  * @coversNothing
  */
 class ExampleUsageTest extends TestCase {
@@ -12,7 +14,6 @@ class ExampleUsageTest extends TestCase {
     /**
      * @return void
      * @dataProvider exampleDataProvider
-     *
      */
     public function testExampleUsage($exampleScript) {
         $descriptorspec = [
@@ -46,7 +47,7 @@ class ExampleUsageTest extends TestCase {
         $this->assertNotEmpty($output, "Example script produced no output");
     }
 
-    public function exampleDataProvider() {
+    public function exampleDataProvider(): array {
         $examplesPath = __DIR__ . '/../../fixtures/examples';
         $files = [];
 
