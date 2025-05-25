@@ -13,7 +13,7 @@ The Zip.php class in this project originates from http://www.phpclasses.org/pack
 
 or on Github: git://github.com/Grandt/PHPZip.git
 
-See the examples for example usage. The php files have "some" doumentation in them in the form of Javadoc style function headers.
+See the [examples](tests/src/fixtures/examples) for example usage. The php files have "some" doumentation in them in the form of Javadoc style function headers.
 
 ## Installation
 

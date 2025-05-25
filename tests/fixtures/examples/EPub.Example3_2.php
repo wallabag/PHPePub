@@ -1,5 +1,5 @@
 <?php
-include '../vendor/autoload.php';
+include __DIR__ . '/../../../vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\Logger;
@@ -72,9 +72,9 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 
 // This test requires you have an image, change "demo/cover-image.jpg" to match your location.
 $log->logLine("Add Cover Image");
-$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
+$book->setCoverImage("Cover.jpg", file_get_contents(__DIR__ . "/demo/cover-image.jpg"), "image/jpeg");
 
-$data = '<div class="img-container" id="em_1" style="left: 138px; top: 148px; height: 232px; width: 308px; position: absolute; z-index: 1;"><img src="http://www.grandt.com/test/sample2.gif" style="width:100%;height:100%;"/></div>';
+$data = '<div class="img-container" id="em_1" style="left: 138px; top: 148px; height: 232px; width: 308px; position: absolute; z-index: 1;"><img src="https://raw.githubusercontent.com/wallabag/PHPePub/refs/heads/master/tests/demo/512x700.jpg" style="width:100%;height:100%;"/></div>';
 
 $book->addChapter("Page 1", "page_1.xhtml", $content_start . $data . $bookEnd, FALSE, EPub::EXTERNAL_REF_ADD);
 
