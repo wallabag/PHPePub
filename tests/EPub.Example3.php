@@ -1,5 +1,5 @@
 <?php
-include 'vendor/autoload.php';
+include '../vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\Logger;
