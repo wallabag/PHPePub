@@ -1,5 +1,5 @@
 <?php
-include 'vendor/autoload.php';
+include __DIR__ . '/../../../vendor/autoload.php';
 
 use \PHPePub\Core\EPub;
 use PHPePub\Helpers\CalibreHelper;

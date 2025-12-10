@@ -1,5 +1,5 @@
 <?php
-include 'vendor/autoload.php';
+include __DIR__ . '/../../../vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\Logger;
@@ -92,7 +92,7 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 
 // This test requires you have an image, change "demo/cover-image.jpg" to match your location.
 $log->logLine("Add Cover Image");
-$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
+$book->setCoverImage("Cover.jpg", file_get_contents(__DIR__ . "/demo/cover-image.jpg"), "image/jpeg");
 
 
 

@@ -84,3 +84,5 @@ legacy/vendor/*
 
 testData
 testData/*
+
+.phpunit.cache
