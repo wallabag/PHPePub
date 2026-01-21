@@ -666,27 +666,41 @@ class EPub {
     /**
      * Add dynamically generated data as a file to the book.
      *
-     * @param string $fileName Filename to use for the file, must be unique for the book.
+     * @param string $filePath File panh and name to use for the file, must be unique for the book.
      * @param string $fileId   Unique identifier for the file.
      * @param string $fileData File data
      * @param string $mimetype file mime type
      *
      * @return bool $success
      */
-    function addFile($fileName, $fileId, $fileData, $mimetype) {
-        if ($this->isFinalized || array_key_exists($fileName, $this->fileList)) {
+    function addFile($filePath, $fileId, $fileData, $mimetype) {
+        if ($this->isFinalized || array_key_exists($filePath, $this->fileList)) {
             return false;
         }
         if (!$this->isInitialized) {
             $this->initialize();
         }
-        $fileName = FileHelper::normalizeFileName($fileName);
+        $filePath = FileHelper::normalizeFileName($filePath);
+
+        $components = explode('/', $filePath);
+        $lastComponent = end($components);
+
+        // Ensure the length of file names is within the spec.
+        // https://www.w3.org/TR/epub/#sec-container-filenames
+        assert(strlen($lastComponent) <= 255, "File name greater than 255 characters: " . $lastComponent);
+        assert(strlen($filePath) <= 65535, "File path greater than 65535 characters: " . $filePath);
+
+        // According to the spec:
+        // "EPUB creators should use an abundance of caution in their file naming when interoperability of content is key."
+        // We assert that the file name only contains basic ASCII letters and numbers.
+        assert(preg_match('/^[a-zA-Z0-9\-\_\.\/]+$/', $filePath),
+            "File path '$filePath' contains invalid characters. Only ASCII letters, numbers, hyphens, underscores, dots and forward slashes are allowed.");
 
         $compress = (strpos($mimetype, "image/") !== 0);
 
-        $this->zip->addFile($fileData, $this->bookRoot . $fileName, 0, null, $compress);
-        $this->fileList[$fileName] = $fileName;
-        $this->opf->addItem($fileId, $fileName, $mimetype);
+        $this->zip->addFile($fileData, $this->bookRoot . $filePath, 0, null, $compress);
+        $this->fileList[$filePath] = $filePath;
+        $this->opf->addItem($fileId, $filePath, $mimetype);
 
         return true;
     }
@@ -1266,6 +1280,7 @@ class EPub {
             $imageData = $image['image'];
             $mimetype = $image['mime'];
             $fileName = preg_replace('#\.[^\.]+$#', "." . $image['ext'], $fileName);
+            $fileName = md5($fileName) . "." . $image['ext'];
         }
 
         $path = pathinfo($fileName);
